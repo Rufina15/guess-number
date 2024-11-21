@@ -27,10 +27,6 @@ class MakeGuess extends GameEvent {
   List<Object> get props => [guess];
 }
 
-class ResetGame extends GameEvent {}
-
-class RestartGame extends GameEvent {}
-
 // Состояния игры
 abstract class GameState extends Equatable {
   @override
@@ -62,17 +58,17 @@ class GameLost extends GameState {
 
 // Логика игры
 class GameBloc extends Bloc<GameEvent, GameState> {
+  final Random random;
+  final int? testCorrectNumber;
   late int _correctNumber;
   late int _attemptsLeft;
-  late int _currentRange;
-  late int _currentAttempts;
 
-  GameBloc() : super(GameInitial()) {
+  GameBloc({Random? random, this.testCorrectNumber})
+      : random = random ?? Random(),
+        super(GameInitial()) {
     on<StartGame>((event, emit) {
-      _correctNumber = Random().nextInt(event.n) + 1;
+      _correctNumber = testCorrectNumber ?? this.random.nextInt(event.n) + 1;
       _attemptsLeft = event.m;
-      _currentRange = event.n;
-      _currentAttempts = event.m;
       emit(GameInProgress(_attemptsLeft, "Игра началась!"));
     });
 
@@ -88,18 +84,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               event.guess > _correctNumber ? "Меньше" : "Больше"));
         }
       }
-    });
-
-    on<RestartGame>((event, emit) {
-      // Перезапуск игры с текущими параметрами
-      _correctNumber = Random().nextInt(_currentRange) + 1;
-      _attemptsLeft = _currentAttempts;
-      emit(GameInProgress(_attemptsLeft, "Игра началась заново!"));
-    });
-
-    on<ResetGame>((event, emit) {
-      // Сброс игры к начальному состоянию
-      emit(GameInitial());
     });
   }
 }
