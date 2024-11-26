@@ -13,10 +13,4 @@ class FixedRandom implements Random {
 
   @override
   double nextDouble() => 0.5;
-
-  @override
-  double nextDoubleSecure() => throw UnimplementedError();
-
-  @override
-  int nextIntSecure(int max) => throw UnimplementedError();
 }

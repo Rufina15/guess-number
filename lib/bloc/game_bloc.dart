@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'dart:math';
 
-// События игры
+// Game Events
 abstract class GameEvent extends Equatable {
   @override
   List<Object> get props => [];
@@ -27,7 +27,7 @@ class MakeGuess extends GameEvent {
   List<Object> get props => [guess];
 }
 
-// Состояния игры
+// Game States
 abstract class GameState extends Equatable {
   @override
   List<Object> get props => [];
@@ -56,32 +56,37 @@ class GameLost extends GameState {
   List<Object> get props => [correctNumber];
 }
 
-// Логика игры
+// Game BLoC
 class GameBloc extends Bloc<GameEvent, GameState> {
-  final Random random;
-  final int? testCorrectNumber;
+  final Random randomGenerator;
+  final void Function(String) logger;
   late int _correctNumber;
   late int _attemptsLeft;
 
-  GameBloc({Random? random, this.testCorrectNumber})
-      : random = random ?? Random(),
+  GameBloc({Random? random, this.logger = print})
+      : randomGenerator = random ?? Random(),
         super(GameInitial()) {
     on<StartGame>((event, emit) {
-      _correctNumber = testCorrectNumber ?? this.random.nextInt(event.n) + 1;
+      _correctNumber = randomGenerator.nextInt(event.n) + 1;
       _attemptsLeft = event.m;
+      logger('Game started: Correct number is $_correctNumber, Attempts: $_attemptsLeft');
       emit(GameInProgress(_attemptsLeft, "Игра началась!"));
     });
 
     on<MakeGuess>((event, emit) {
+      logger('User guessed: ${event.guess}');
       if (event.guess == _correctNumber) {
+        logger('Game won by the user.');
         emit(GameWon());
       } else {
         _attemptsLeft--;
         if (_attemptsLeft == 0) {
+          logger('Game lost. Correct number was $_correctNumber.');
           emit(GameLost(_correctNumber));
         } else {
-          emit(GameInProgress(_attemptsLeft,
-              event.guess > _correctNumber ? "Меньше" : "Больше"));
+          final hint = event.guess > _correctNumber ? "Меньше" : "Больше";
+          logger('Hint provided: $hint. Attempts left: $_attemptsLeft');
+          emit(GameInProgress(_attemptsLeft, hint));
         }
       }
     });
