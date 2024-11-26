@@ -15,8 +15,8 @@ Hi. My name is Rufina, and this is the introductory documentation for the Guess 
 
 `lib/
 ├── bloc/
-│     └── game_bloc.dart       # Business logic of the game (BLoC architecture)
-├── main.dart                  # Main entry point for the Flutter app
+│     └── game_bloc.dart      # Business logic of the game (BLoC architecture)
+├── main.dart                # Main entry point for the Flutter app
 
 test/
 ├── bloc/
